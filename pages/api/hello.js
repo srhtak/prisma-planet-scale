@@ -14,6 +14,18 @@ export default async function handler(req, res) {
   }
 }
 
+async function readBooks(req, res) {
+  const body = req.body;
+
+  try {
+    const allBooks = await prisma.bookSuggestions.findMany();
+    return res.status(200).json(allBooks, { success: true });
+  } catch (error) {
+    console.error("Request error", error);
+    res.status(500).json({ error: "Error reading books", success: false });
+  }
+}
+
 async function addBook(req, res) {
   const body = req.body;
   try {

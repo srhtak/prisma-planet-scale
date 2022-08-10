@@ -1,9 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  const handleSubmit = (e) => {
+  const [bookTitle, setBookTitle] = useState("");
+  const [bookAuthor, setBookAuthor] = useState("");
+  const [bookGenre, setBookGenre] = useState("");
+  const [APIResponse, setAPIResponse] = useState(null);
+
+  const readDB = async () => {
+    try {
+      const allBooks = await fetch("api/hello", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      setAPIResponse(await allBooks.json());
+      if (response.status !== 200) {
+        console.log("Error reading books");
+      } else {
+        console.log("Books readed");
+        console.log(allBooks);
+      }
+    } catch (error) {
+      console.error("Request error", error);
+    }
+  };
+
+  const resetForm = () => {
+    setBookTitle("");
+    setBookAuthor("");
+    setBookGenre("");
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("submit");
+    const body = { bookTitle, bookAuthor, bookGenre };
+    try {
+      const response = await fetch("api/hello", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (response.status !== 200) {
+        console.log("Error adding book");
+      } else {
+        resetForm();
+        readDB();
+        console.log("Book added");
+      }
+    } catch (error) {
+      console.error("Request error", error);
+    }
   };
   return (
     <section className="py-6 bg-coolGray-100 text-coolGray-900">
@@ -20,6 +65,11 @@ export default function Home() {
       >
         <div className="py-6 md:py-0 md:px-6">
           <h1 className="text-4xl font-bold">Books</h1>
+          <div>
+            {APIResponse?.map((book) => (
+              <h1 key={book.id}>{book.bookTitle}</h1>
+            ))}
+          </div>
         </div>
         <form
           onSubmit={handleSubmit}
@@ -34,10 +84,12 @@ export default function Home() {
           <label className="block">
             <span className="mb-1">Book Title</span>
             <input
+              onChange={(e) => setBookTitle(e.target.value)}
               type="text"
               className="
               h-12
             block
+            px-4
             w-full
             border
             rounded-md
@@ -50,9 +102,10 @@ export default function Home() {
           <label className="block">
             <span className="mb-1">Author Name</span>
             <input
-              type="email"
+              onChange={(e) => setBookAuthor(e.target.value)}
               className="
               h-12
+              px-4
             block
             border
             w-full
@@ -66,9 +119,10 @@ export default function Home() {
           <label className="block">
             <span className="mb-1">Genre</span>
             <input
-              type="email"
+              onChange={(e) => setBookGenre(e.target.value)}
               className="
               h-12
+              px-4
             block
             border
             w-full
